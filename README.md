@@ -20,6 +20,7 @@ The stemming + quoted exact match logic is implemented using only the Python sta
 - Python 3
 - `numpy`
 - `scikit-learn`
+- `Sentence Transformer`
 
 ### Install (recommended in a virtual environment)
 ```bash
