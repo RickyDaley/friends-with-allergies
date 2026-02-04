@@ -22,6 +22,7 @@
             background-color: #d1d3d280;
             padding: 10px 10px;
             font-size: 3em;
+            cursor: pointer;
         }
 
         form {
@@ -55,34 +56,45 @@
         button:hover {
             background-color: #d63384;
         }
+
+        #red_flag_search, #green_flag_search {
+            display: none;
+        }
+
+        #semantic_button {
+            background-color: #d63384;
+        }
+
     </style>
 </head>
 <body>
 <section>
     <header>
-    	<h1>Friends with allergies</h1>
+    	<h1 onclick="call_semantic_search()">Friends with allergies</h1>
     </header>
     
     <nav>
-        <button id="boolean" onclick="myFunction2()">Boolean Search</button>
-        <button id="tf-idf" onclick="myFunction2()">TF-IDF Search</button>
-        <button id="semantic" onclick="myFunction1()">Semantic Search</button>
+        <button id="semantic_button" onclick="call_semantic_search()">Semantic Search</button>
+        <button id="boolean_button" onclick="call_boolean_search()">Boolean Search</button>
+        <button id="tf_idf_button" onclick="call_tf_idf_search()">TF-IDF Search</button>
  	</nav>
     
     <article>
-        <div id="semanticsearch">
+        <div id="semantic_search">
         <input type="text" name="user_input" placeholder="What to eat!">
         <form action="/process" method="post">
         	<button type="submit">Search</button>
     	</form>
         </div>
 
-        <div id="boolean-tf-idf-search">
+        <div id="red_flag_search">
         <input type="text" name="user_input" placeholder="Red flag: Don't include!">
         <form action="/process" method="post">
         	<button type="submit">Search</button>
     	</form>
+        </div>
 
+        <div id="green_flag_search">
         <input type="text" name="user_input" placeholder="Green flag: I want this!">
         <form action="/process" method="post">
         	<button type="submit">Search</button>
@@ -91,31 +103,63 @@
     </article>
 </section>	
     <script>
-function myFunction1() {
-  var x = document.getElementById("semanticsearch");
-  var y = document.getElementById("boolean-tf-idf-search");
-  var z = document.getElementById("semantic");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-    y.style.display = "none";
-    z.style.backgroundColor = "#d63384";
-  } else {
-    x.style.display = "none";
-    y.style.display = "block";
-    z.style.backgroundColor = "#ff69b4";
-  }
+function call_semantic_search() {
+  var semantic_search_div = document.getElementById("semantic_search");
+  var red_flag_search_div = document.getElementById("red_flag_search");
+  var green_flag_search_div = document.getElementById("green_flag_search");
+
+  var semantic_button = document.getElementById("semantic_button");
+  var boolean_button = document.getElementById("boolean_button");
+  var tf_idf_button = document.getElementById("tf_idf_button");
+
+  semantic_search_div.style.display = "block";
+  semantic_button.style.backgroundColor = "#d63384";
+
+  red_flag_search_div.style.display = "none";
+  boolean_button.style.backgroundColor = "#ff69b4";
+
+  green_flag_search_div.style.display = "none";
+  tf_idf_button.style.backgroundColor = "#ff69b4";
+
 }
 
-function myFunction2() {
-  var x = document.getElementById("boolean-tf-idf-search");
-  var y = document.getElementById("semanticsearch");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-    y.style.display = "none";
-  } else {
-    x.style.display = "none";
-    y.style.display = "block";
-  }
+function call_boolean_search() {
+  var semantic_search_div = document.getElementById("semantic_search");
+  var red_flag_search_div = document.getElementById("red_flag_search");
+  var green_flag_search_div = document.getElementById("green_flag_search");
+
+  var semantic_button = document.getElementById("semantic_button");
+  var boolean_button = document.getElementById("boolean_button");
+  var tf_idf_button = document.getElementById("tf_idf_button");
+
+  semantic_search_div.style.display = "none";
+  semantic_button.style.backgroundColor = "#ff69b4";
+
+  red_flag_search_div.style.display = "block";
+  boolean_button.style.backgroundColor = "#d63384";
+
+  green_flag_search_div.style.display = "block";
+  tf_idf_button.style.backgroundColor = "#ff69b4";
+}
+
+function call_tf_idf_search() {
+  var semantic_search_div = document.getElementById("semantic_search");
+  var red_flag_search_div = document.getElementById("red_flag_search");
+  var green_flag_search_div = document.getElementById("green_flag_search");
+
+  var semantic_button = document.getElementById("semantic_button");
+  var boolean_button = document.getElementById("boolean_button");
+  var tf_idf_button = document.getElementById("tf_idf_button");
+
+  semantic_search_div.style.display = "none";
+  semantic_button.style.backgroundColor = "#ff69b4";
+
+  red_flag_search_div.style.display = "block";
+  boolean_button.style.backgroundColor = "#ff69b4";
+
+  green_flag_search_div.style.display = "block";
+  tf_idf_button.style.backgroundColor = "#d63384";
+
 }
 </script>
 
