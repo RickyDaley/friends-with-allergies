@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends with allergies</title>
+    <style>
+        body {
+            background-image: url('dropback.avif');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            display: inline-block;
+            color: #d63384;
+            background-color: #d1d3d280;
+            padding: 10px 10px;
+            font-size: 3em;
+            cursor: pointer;
+        }
+
+        form {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            width: 250px;
+            padding: 7px;
+            border: 2px solid #d1d3d280;
+            border-radius: 1px;
+            font-size: 1em;
+            margin-right: 1px;
+        }
+
+        button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #d63384;
+        }
+
+        #red_flag_search, #green_flag_search {
+            display: none;
+        }
+
+        #semantic_button {
+            background-color: #d63384;
+        }
+
+    </style>
+</head>
+<body>
+<section>
+    <header>
+    	<h1>Friends with allergies</h1>
+    </header>
+    
+    <nav>
+        <form action="/switch" method="post">
+            <button type="submit" id="semantic_switch" name="semantic">Semantic Search</button>
+        </form>
+        <form action="/switch" method="post">
+            <button type="submit" id="boolean_switch" name="boolean">Boolean Search</button>
+        </form>
+        <form action="/switch" method="post">
+            <button type="submit" id="tf_idf_switch" name="tf_idf">TF-IDF Search</button>
+        </form>
+ 	</nav>
+    
+    <article>
+        {% if sem_show %}
+        <div id="semanticsearch">
+        <form action="/search" method="post">
+            <input type="text" name="query" placeholder="What to eat!">
+        	<button type="submit">Search</button>
+    	</form>
+        </div>
+        {% endif %}
+        {% if bool_tfidf_show %}
+        <div id="boolean-tf-idf-search">
+        <form action="/search" method="post">
+            <input type="text" name="query_yes" placeholder="Green flag: I want this!">
+            <input type="text" name="query_no" placeholder="Red flag: Don't include!">
+        	<button type="submit">Search</button>
+    	</form>
+        {% endif %}
+        </div>
+    </article>
+    <article>
+        {% for match in matches %}
+        <div id="match">{{ match }}</div>
+        {% endfor %}
+    </article>
+</section>	
+<script>
+    function call_semantic_search() {
+    //var semantic_search_div = document.getElementById("semantic_search");
+    //var red_flag_search_div = document.getElementById("red_flag_search");
+    //var green_flag_search_div = document.getElementById("green_flag_search");
+
+    var semantic_button = document.getElementById("semantic_switch");
+    var boolean_button = document.getElementById("boolean_switch");
+    var tf_idf_button = document.getElementById("tf_idf_switch");
+
+    semantic_search_div.style.display = "block";
+    semantic_button.style.backgroundColor = "#d63384";
+
+    red_flag_search_div.style.display = "none";
+    boolean_button.style.backgroundColor = "#ff69b4";
+
+    green_flag_search_div.style.display = "none";
+    tf_idf_button.style.backgroundColor = "#ff69b4";
+
+    }
+
+    function call_boolean_search() {
+    //var semantic_search_div = document.getElementById("semantic_search");
+    //var red_flag_search_div = document.getElementById("red_flag_search");
+    //var green_flag_search_div = document.getElementById("green_flag_search");
+
+    var semantic_button = document.getElementById("semantic_switch");
+    var boolean_button = document.getElementById("boolean_switch");
+    var tf_idf_button = document.getElementById("tf_idf_switch");
+
+    //semantic_search_div.style.display = "none";
+    semantic_button.style.backgroundColor = "#ff69b4";
+
+    //red_flag_search_div.style.display = "block";
+    boolean_button.style.backgroundColor = "#d63384";
+
+    //green_flag_search_div.style.display = "block";
+    tf_idf_button.style.backgroundColor = "#ff69b4";
+    }
+
+    function call_tf_idf_search() {
+    //var semantic_search_div = document.getElementById("semantic_search");
+    //var red_flag_search_div = document.getElementById("red_flag_search");
+    //var green_flag_search_div = document.getElementById("green_flag_search");
+
+    var semantic_button = document.getElementById("semantic_switch");
+    var boolean_button = document.getElementById("boolean_switch");
+    var tf_idf_button = document.getElementById("tf_idf_switch");
+
+    //semantic_search_div.style.display = "none";
+    semantic_button.style.backgroundColor = "#ff69b4";
+
+    //red_flag_search_div.style.display = "block";
+    boolean_button.style.backgroundColor = "#ff69b4";
+
+    //green_flag_search_div.style.display = "block";
+    tf_idf_button.style.backgroundColor = "#d63384";
+
+}
+</script>
+
+
+</body>
+</html>
