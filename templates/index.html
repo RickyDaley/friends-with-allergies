@@ -65,6 +65,173 @@
             background-color: #d63384;
         }
 
+        .results-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff69b4;
+        }
+
+        .results-header h2 {
+            color: #d63384;
+            margin: 0 0 10px 0;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .result-count {
+            background-color: #d63384;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .search-engine {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Restaurant Cards */
+        .restaurant-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #ff69b4;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .restaurant-name {
+            color: #d63384;
+            margin: 0 0 15px 0;
+            font-size: 1.8em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .restaurant-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            padding: 8px 0;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 8px;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        /* Description */
+        .description {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .description p {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0 0 0;
+        }
+
+        /* Page Link Button */
+        .page-link {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        
+        .visit-button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .visit-button:hover {
+            background-color: #45a049;
+            text-decoration: none;
+        }
+        
+        /* Price level styling */
+        .price-level {
+            display: inline-block;
+            color: #FF9800;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        
+        /* Rating styling */
+        .rating-value {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-results h3 {
+            color: #d63384;
+            margin-bottom: 15px;
+        }
+
+        .no-results ul {
+            display: inline-block;
+            text-align: left;
+            margin: 15px auto;
+            max-width: 300px;
+        }
+
+        .no-results li {
+            margin: 5px 0;
+        }    
+
     </style>
 </head>
 <body>
@@ -103,12 +270,122 @@
     	</form>
         {% endif %}
         </div>
+
     </article>
-    <article>
-        {% for match in matches %}
-        <div id="match">{{ match }}</div>
-        {% endfor %}
-    </article>
+    {% if matches is not none %}
+<article class="results-section">
+    <!-- Result Header -->
+    <div class="results-header">
+        <h2>Search Results</h2>
+        <div class="result-stats">
+            <span class="result-count">Found {{ matches|length }} result{% if matches|length != 1 %}s{% endif %}</span>
+            {% if engine %}
+            <span class="search-engine">({{ engine|title }} Search)</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Results List -->
+    <div class="results-container">
+        {% if matches|length > 0 %}
+            {% for restaurant in matches %}
+            <div class="restaurant-card">
+                <!-- Restaurant Name -->
+                <h3 class="restaurant-name">{{ restaurant.Name }}</h3>
+                
+                <!-- Basic Info Grid -->
+                <div class="restaurant-info">
+                    {% if restaurant.Location %}
+                    <div class="info-item">
+                        <span class="info-label">📍 Location:</span>
+                        <span class="info-value">{{ restaurant.Location }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if restaurant.Cuisine %}
+                    <div class="info-item">
+                        <span class="info-label">🍽️ Cuisine:</span>
+                        <span class="info-value">{{ restaurant.Cuisine }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if restaurant.Meals %}
+                    <div class="info-item">
+                        <span class="info-label">🍴 Meals:</span>
+                        <span class="info-value">{{ restaurant.Meals }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if restaurant['Price Level (out of 4)'] %}
+                    <div class="info-item">
+                        <span class="info-label">💰 Price Level:</span>
+                        <span class="info-value">
+                            {% set price_level = restaurant['Price Level (out of 4)'] %}
+                            {% if price_level is number %}
+                                {{ '$' * price_level|int }} ({{ price_level }}/4)
+                            {% else %}
+                                {{ price_level }}/4
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if restaurant['Rating (out of 6)'] %}
+                    <div class="info-item">
+                        <span class="info-label">⭐ Rating:</span>
+                        <span class="info-value">
+                            {% set rating = restaurant['Rating (out of 6)'] %}
+                            {% if rating is number %}
+                                {{ rating|round(1) }}/6
+                            {% else %}
+                                {{ rating }}/6
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if restaurant['Review Count'] %}
+                    <div class="info-item">
+                        <span class="info-label">📊 Reviews:</span>
+                        <span class="info-value">{{ restaurant['Review Count'] }} reviews</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Page URL Link -->
+                {% if restaurant['Page URL'] %}
+                <div class="page-link">
+                    <a href="{{ restaurant['Page URL'] }}" target="_blank" class="visit-button">
+                        🔗 Visit Restaurant Page
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Optional: Debug section (remove in production) -->
+                <details style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 0.9em;">
+                    <summary style="cursor: pointer; color: #666;">🔍 Show all data fields</summary>
+                    <div style="text-align: left; margin-top: 10px; font-family: monospace;">
+                        {% for key, value in restaurant.items() %}
+                        <div style="margin: 5px 0; padding: 3px; background: white; border-radius: 3px;">
+                            <strong>{{ key }}:</strong> 
+                            <span>{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+            </div>
+            {% endfor %}
+        {% else %}
+            <!-- No Results Message -->
+            <div class="no-results">
+                <h3>No restaurants found</h3>
+                <p>Try adjusting your search terms or try a different search engine.</p>
+            </div>
+        {% endif %}
+    </div>
+</article>
+{% endif %}
+
 </section>	
 <script>
     function call_semantic_search() {
