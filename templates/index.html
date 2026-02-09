@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{ chart_resources|safe }}
     <title>Friends with allergies</title>
     <style>
         body {
-            background-image: url('dropback.avif');
+            background-image: url('/static/dropback.avif');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
@@ -54,6 +55,22 @@
         }
 
         button:hover {
+            background-color: #d63384;
+        }
+
+        .switch_True {
+            background-color: #d63384;
+        }
+
+        .switch_True:hover {
+            background-color: #ff69b4;
+        }
+
+        .switch_False {
+            background-color: #ff69b4;
+        }
+
+        .switch_False:hover {
             background-color: #d63384;
         }
 
@@ -234,6 +251,9 @@
 
     </style>
 </head>
+<header>
+    {{ chart_script|safe }}
+</header>
 <body>
 <section>
     <header>
@@ -242,13 +262,13 @@
     
     <nav>
         <form action="/switch" method="post">
-            <button type="submit" id="semantic_switch" name="semantic">Semantic Search</button>
+            <button type="submit" id="semantic_switch" name="semantic" class="switch_{{ engine == 'semantic' }}">Semantic Search</button>
         </form>
         <form action="/switch" method="post">
-            <button type="submit" id="boolean_switch" name="boolean">Boolean Search</button>
+            <button type="submit" id="boolean_switch" name="boolean" class="switch_{{ engine == 'boolean' }}">Boolean Search</button>
         </form>
         <form action="/switch" method="post">
-            <button type="submit" id="tf_idf_switch" name="tf_idf">TF-IDF Search</button>
+            <button type="submit" id="tf_idf_switch" name="tf_idf" class="switch_{{ engine == 'tf_idf' }}">TF-IDF Search</button>
         </form>
  	</nav>
     
@@ -257,7 +277,7 @@
         <div id="semanticsearch">
         <form action="/search" method="post">
             <!-- Update the input fields to preserve values -->
-            <input type="text" name="query" placeholder="What to eat!" value="{{ query or '' }}">
+            <input type="text" name="query" placeholder="Describe your preferences" value="{{ query or '' }}">
         	<button type="submit">Search</button>
     	</form>
         </div>
@@ -285,6 +305,7 @@
             <span class="search-engine">({{ engine|title }} Search)</span>
             {% endif %}
         </div>
+        <div id="chart_area">{{ chart_div|safe }}</div>
     </div>
     
     <!-- Results List -->
@@ -306,14 +327,14 @@
                     
                     {% if restaurant.Cuisine %}
                     <div class="info-item">
-                        <span class="info-label">🍽️ Cuisine:</span>
+                        <span class="info-label">🌍 Cuisine:</span>
                         <span class="info-value">{{ restaurant.Cuisine }}</span>
                     </div>
                     {% endif %}
                     
                     {% if restaurant.Meals %}
                     <div class="info-item">
-                        <span class="info-label">🍴 Meals:</span>
+                        <span class="info-label">🍽️ Meals:</span>
                         <span class="info-value">{{ restaurant.Meals }}</span>
                     </div>
                     {% endif %}
@@ -390,6 +411,12 @@
 
 </section>	
 <script>
+    // Plotting charts
+    function embed_chart(chart_data) {
+        chart = JSON.parse(chart_data);
+        Bokeh.embed.embed_item(chart, "chart_area");
+    }
+
     function call_semantic_search() {
     //var semantic_search_div = document.getElementById("semantic_search");
     //var red_flag_search_div = document.getElementById("red_flag_search");

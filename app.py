@@ -9,15 +9,14 @@ engine = 'semantic'
 sem_show, bool_tfidf_show = True, False
 
 data = pd.DataFrame()
-documents = []
-doc_embeddings = pd.DataFrame()
+review_dict, menu_dict, embed_review_dict, embed_menu_dict = {}, {}, {}, {}
 
 
 @app.route('/')
 def init():
-    global data, documents, doc_embeddings
-    data, documents, doc_embeddings = dp.initialise_index()
-    return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show)
+    global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict
+    data, review_dict, menu_dict, embed_review_dict, embed_menu_dict = dp.initialise_index()
+    return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show)
 
 
 @app.route('/switch', methods=['POST'])
@@ -51,8 +50,11 @@ def search():
     else:
         return render_template('error.html', error_msg="Wrong search engine name or no search engine provided")
     
-    matching_entries = list(json.loads(data[data.Name.isin(matches)].T.to_json()).values())
+    matches_table = data[data.Name.isin(matches)]
+    matching_entries = list(json.loads(matches_table.T.to_json()).values())
     print(matching_entries)
+
+    script, div, resources = dp.plot_freq(pd.DataFrame(matches_table), 'Rating (out of 6)')
     
     # Pass the search terms back to template
     return render_template('index.html', 
@@ -60,9 +62,15 @@ def search():
                          bool_tfidf_show=bool_tfidf_show, 
                          matches=matching_entries,
                          engine=engine,
+                         chart_script = script,
+                         chart_div = div,
+                         chart_resources = resources,
                          query_yes=query_yes,
                          query_no=query_no,
                          query=query)
+
+
+
 
 # ============== API ENDPOINTS ==============
 

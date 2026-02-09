@@ -1,10 +1,14 @@
 import os
+import json
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 import numpy as np
 import pandas as pd
 import translators as ts
 from math import inf
+from bokeh.plotting import figure
+from bokeh.embed import components
+from bokeh.resources import CDN
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from sentence_transformers import SentenceTransformer
 nltk.download('wordnet')
@@ -45,22 +49,45 @@ def translate_batch(text_entries):
         transl_chunk = translate_chunk(chunk)
         transl_entries.append(transl_chunk)
     return transl_entries
+
+
+def translate_list(text_entries):
+    transl_entries = []
+    limit = 10000
+    chunk = ''
+    for entry in text_entries:
+        test_chunk = chunk + '\n' + entry if chunk else entry
+        if len(test_chunk) > limit:
+            transl_chunk = translate_chunk(chunk)
+            transl_entries.extend(transl_chunk.split('\n'))
+            chunk = entry
+        elif len(test_chunk) == limit:
+            transl_chunk = translate_chunk(test_chunk)
+            transl_entries.extend(transl_chunk.split('\n'))
+            chunk = ''
+        else:
+            chunk = test_chunk
+    if chunk:
+        transl_chunk = translate_chunk(chunk)
+        transl_entries.extend(transl_chunk.split('\n'))
+    return transl_entries
     
 
 def initialise_index():
-    documents = []
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     absolute_path = lambda x: os.path.join(__location__, x)
-    data = pd.read_csv(absolute_path("restaurant_data.csv"), sep="\t", index_col=0)
-    reviews = pd.read_csv(absolute_path("translated_review_data.csv"), sep="\t")
-    highlights = pd.read_csv(absolute_path("menu_highlights.csv"), sep="\t", index_col=0)
+    data = pd.read_csv(absolute_path("data/restaurant_data.csv"), sep="\t", index_col=0)
+    reviews = pd.read_csv(absolute_path("data/translated_review_data.csv"), sep="\t", index_col=0)
+    menus = pd.read_csv(absolute_path("data/translated_menu_data.csv"), sep="\t", index_col=0)
+    review_dict, menu_dict, embed_review_dict, embed_menu_dict = {}, {}, {}, {}
     for _, row in data.iterrows():
-        rest_reviews = reviews[reviews.Restaurant == row.Name]["Reviews"].values[0]
-        rest_reviews = rest_reviews if isinstance(rest_reviews, str) else ''
-        full_rest_text = '\n'.join([row.Name, row.Location, row.Cuisine, str(row.Meals)]) + '\n' + rest_reviews
-        documents.append(full_rest_text)
-    doc_embeddings = model.encode(documents)
-    return data, documents, doc_embeddings
+        rest_reviews = reviews[reviews.Restaurant == row.Name]["Review Text Eng"].values
+        review_dict[row.Name] = rest_reviews
+        embed_review_dict[row.Name] = model.encode(rest_reviews)
+        rest_menu = menus[menus.Restaurant == row.Name]["Menu Eng"].values
+        menu_dict[row.Name] = rest_menu
+        embed_menu_dict[row.Name] = model.encode(rest_menu)
+    return data, review_dict, menu_dict, embed_review_dict, embed_menu_dict
 
 
 def extract_lemmas(docs):
@@ -103,8 +130,8 @@ def get_term_vector(term, t2i, td_matrix):
 
 
 def boolean_search(query_yes, query_no, documents):
-    # to make it more rubust when users only give one query.
-    if not (query_yes or query_no): 
+    # to make it more robust when users only give one query.
+    if not (query_yes or query_no):
         return []
     if query_yes:
         transl_query_yes = translate_chunk(query_yes)
@@ -157,7 +184,7 @@ def get_tf_idf_scores(query, documents):
  
 
 def tf_idf_search(query_yes, query_no, documents):
-    # to make it more rubust when users only give one query.
+    # to make it more robust when users only give one query.
     if not (query_yes or query_no):
         return []
     if query_yes:
@@ -248,3 +275,11 @@ def allergy_reviews_analyser(all_reviews,similarity_threshold=0.3):
         positive_proportion == "Neutral" # return "Neutral" if the reviews doesn't have any related to allergy
 
     return positive_proportion
+
+
+def plot_freq(data, column):
+    x, y = np.unique(data[column].values, return_counts=True)
+    p = figure()
+    p.scatter(x, y)
+    script, div = components(p)
+    return script, div, CDN.render()

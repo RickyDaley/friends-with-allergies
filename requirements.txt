@@ -1,8 +1,10 @@
+ipykernel
 pandas
 requests
 beautifulsoup4
 nltk
 scikit-learn
 flask
+bokeh
 translators
 sentence_transformers
