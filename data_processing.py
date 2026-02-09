@@ -245,6 +245,6 @@ def allergy_reviews_analyser(all_reviews,similarity_threshold=0.3):
     if total_allergy_reviews_number > 0:
         positive_proportion = positive_count/total_allergy_reviews_number
     else:
-        positive_proportion == "Neutral"
+        positive_proportion == "Neutral" # return "Neutral" if the reviews doesn't have any related to allergy
 
     return positive_proportion
