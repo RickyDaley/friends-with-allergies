@@ -97,24 +97,79 @@ def search_single():
 def search_double():
     query_yes = request.form.get('query_yes', '')
     query_no = request.form.get('query_no', '')
+    
+    # Validate input - at least one query should be provided
+    if not query_yes and not query_no:
+        return render_template('error.html', error_msg="Please enter at least one search term (green flag or red flag)")
 
-    # Green flag filtering
+    # ============== GREEN FLAG FILTERING (Issue #35) ==============
+    # Search for dishes/menus that match the green flag query
     rest_to_dish_map, dishes_list = dict_values_to_list(menu_dict)
     
-    if engine == 'boolean':
-        matched_docs = dp.boolean_search(query_yes, dishes_list)
-    elif engine == 'tf_idf':
-        matched_docs = dp.tf_idf_search(query_yes, dishes_list)
-    else:
-        return render_template('error.html', error_msg="Wrong search engine name or no search engine provided")
+    matching_dishes = {}  # Store matched dishes for display
     
-    matching_scores = get_matching_scores(rest_to_dish_map, matched_docs)
-    matching_scores = [(key, val) for key, val in matching_scores.items() if val > 0]
-    matching_scores.sort(key=lambda x: -x[1])
-    matching_ids = [list(menu_dict.keys()).index(key) for key, _ in matching_scores]
+    if query_yes:
+        # Perform search based on selected engine
+        if engine == 'boolean':
+            matched_docs = dp.boolean_search(query_yes, dishes_list)
+        elif engine == 'tf_idf':
+            matched_docs = dp.tf_idf_search(query_yes, dishes_list)
+        else:
+            return render_template('error.html', error_msg="Wrong search engine name or no search engine provided")
+        
+        # Calculate matching scores and get matched dishes for each restaurant
+        matching_scores = get_matching_scores(rest_to_dish_map, matched_docs)
+        
+        # Store matched dishes for display (evidence of match)
+        for idx in matched_docs:
+            rest_name = find_rest_for_idx(rest_to_dish_map, idx)
+            if rest_name:
+                if rest_name not in matching_dishes:
+                    matching_dishes[rest_name] = []
+                matching_dishes[rest_name].append(dishes_list[idx])
+        
+        # Filter to only restaurants with matches (score > 0)
+        matching_scores = [(key, val) for key, val in matching_scores.items() if val > 0]
+        matching_scores.sort(key=lambda x: -x[1])  # Sort by match count descending
+        matched_restaurant_names = [key for key, _ in matching_scores]
+    else:
+        # No green flag - start with all restaurants
+        matched_restaurant_names = list(menu_dict.keys())
+    
+    # ============== RED FLAG FILTERING (Issue #36) ==============
+    # If red flag is specified, filter out restaurants with low general allergy score
+    filtered_out_info = []
+    if query_no:
+        # Apply general allergy score filtering
+        matched_restaurant_names, filtered_out_info = dp.filter_by_general_allergy_score(
+            matched_restaurant_names, 
+            review_dict, 
+            embed_review_dict,
+            threshold=dp.RED_FLAG_NEGATIVE_THRESHOLD
+        )
+    
+    # Handle case where no restaurants match
+    if not matched_restaurant_names:
+        return render_template('index.html', 
+                             sem_show=sem_show, 
+                             bool_tfidf_show=bool_tfidf_show, 
+                             matches=[],
+                             engine=engine,
+                             query_yes=query_yes,
+                             query_no=query_no,
+                             no_results_message="No restaurants found matching your criteria. Try different search terms.")
+    
+    # Convert restaurant names to data entries
+    matching_ids = [list(menu_dict.keys()).index(name) for name in matched_restaurant_names if name in menu_dict.keys()]
     matches_table, matching_entries = doc_ids_to_data_entries(matching_ids)
-
-    # Implement filtering for query_no here ...
+    
+    # Add matched dishes info to each restaurant entry for display
+    for entry in matching_entries:
+        rest_name = entry.get('Name', '')
+        if rest_name in matching_dishes:
+            # Limit to first 5 matched dishes for display
+            entry['matched_dishes'] = matching_dishes[rest_name][:5]
+            entry['total_matches'] = len(matching_dishes[rest_name])
 
     script, div, resources = dp.plot_freq(pd.DataFrame(matches_table), 'Rating (out of 6)')
     
@@ -124,11 +179,12 @@ def search_double():
                          bool_tfidf_show=bool_tfidf_show, 
                          matches=matching_entries,
                          engine=engine,
-                         chart_script = script,
-                         chart_div = div,
-                         chart_resources = resources,
+                         chart_script=script,
+                         chart_div=div,
+                         chart_resources=resources,
                          query_yes=query_yes,
-                         query_no=query_no)
+                         query_no=query_no,
+                         filtered_count=len(filtered_out_info))
 
 
 
@@ -262,7 +318,21 @@ curl "http://localhost:5001/api/restaurants?cuisine=Italian&limit=5"
 
 =============================================================================
 """
-  
+
+
+@app.route('/test500')
+def test_500():
+    1 / 0  
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html', error_msg="404 Not Found"), 404
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('error.html', error_msg="500 Internal Server Error"), 500
+
+
 if __name__ == "__main__":
     #Change the Flask app to run on a different port than 5000 to prevent port 5000 being used by AirTunes problem
-    app.run(debug=True, port=5001)
+    app.run(debug=False, port=5001) # change debug to false to see the custom 500 error pages instead of Flask's default error pages

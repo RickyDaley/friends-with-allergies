@@ -244,5 +244,97 @@ def plot_freq(data, column):
     return script, div, CDN.render()
 
 
+# ============== RED FLAG FILTERING (Issue #36) ==============
+
+# Configurable threshold - restaurants with negative proportion >= this value will be filtered out
+RED_FLAG_NEGATIVE_THRESHOLD = 0.25  # 25% negative reviews threshold
+
+def filter_by_general_allergy_score(restaurant_names, review_dict, embed_review_dict, threshold=RED_FLAG_NEGATIVE_THRESHOLD):
+    """
+    Filter restaurants based on their general allergy score.
+    Removes restaurants where the proportion of negative allergy-related reviews >= threshold.
+    
+    Args:
+        restaurant_names: List of restaurant names to filter
+        review_dict: Dictionary mapping restaurant names to their reviews
+        embed_review_dict: Dictionary mapping restaurant names to embedded reviews
+        threshold: Maximum allowed proportion of negative allergy reviews (default 0.25)
+    
+    Returns:
+        filtered_names: List of restaurant names that passed the filter
+        filtered_out: List of tuples (name, negative_proportion, reason) for restaurants that were filtered out
+    """
+    filtered_names = []
+    filtered_out = []
+    
+    for name in restaurant_names:
+        if name not in review_dict or name not in embed_review_dict:
+            # Keep restaurants with no review data (benefit of the doubt)
+            filtered_names.append(name)
+            continue
+        
+        all_reviews = review_dict[name]
+        embed_reviews = embed_review_dict[name]
+        
+        if len(all_reviews) == 0 or embed_reviews.shape[0] == 0:
+            # Keep restaurants with no reviews
+            filtered_names.append(name)
+            continue
+        
+        # Calculate general allergy score
+        score = general_allergy_score(all_reviews, embed_reviews, threshold=0.3)
+        
+        if score == "Neutral":
+            # No allergy-related reviews found - keep the restaurant
+            filtered_names.append(name)
+        else:
+            positive_proportion = score
+            negative_proportion = 1 - positive_proportion
+            
+            if negative_proportion >= threshold:
+                # Too many negative allergy reviews - filter out
+                filtered_out.append((
+                    name, 
+                    negative_proportion, 
+                    f"Filtered: {negative_proportion:.0%} negative allergy reviews (threshold: {threshold:.0%})"
+                ))
+            else:
+                # Passed the filter
+                filtered_names.append(name)
+    
+    return filtered_names, filtered_out
+
+
+def get_matching_dishes(query, dishes_list, rest_to_dish_map, search_func):
+    """
+    Find matching dishes for each restaurant based on the search query.
+    
+    Args:
+        query: Search query string
+        dishes_list: List of all dishes across all restaurants
+        rest_to_dish_map: Mapping from restaurant name to (start_idx, end_idx) in dishes_list
+        search_func: Search function to use (boolean_search or tf_idf_search)
+    
+    Returns:
+        Dictionary mapping restaurant names to list of matching dishes
+    """
+    if not query:
+        return {}
+    
+    matched_indices = search_func(query, dishes_list)
+    
+    matching_dishes = {}
+    for idx in matched_indices:
+        # Find which restaurant this dish belongs to
+        for rest_name, (start, end) in rest_to_dish_map.items():
+            if start <= idx < end:
+                if rest_name not in matching_dishes:
+                    matching_dishes[rest_name] = []
+                matching_dishes[rest_name].append(dishes_list[idx])
+                break
+    
+    return matching_dishes
+
+
 if __name__ == "__main__":
     pass

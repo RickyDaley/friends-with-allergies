@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oops! Something went wrong</title>
+    <style>
+        body {
+            background-image: url('/static/dropback.avif');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 50px;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .error-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border-top: 5px solid #d63384;
+        }
+
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #d63384;
+            font-size: 2.5em;
+            margin: 0 0 15px 0;
+        }
+
+        .error-subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .error-message {
+            background-color: #fff3f8;
+            border: 1px solid #ffcce0;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            color: #a94442;
+            font-family: monospace;
+            font-size: 0.95em;
+            word-break: break-word;
+        }
+
+        .error-suggestions {
+            text-align: left;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px 30px;
+            margin: 25px 0;
+        }
+
+        .error-suggestions h3 {
+            color: #555;
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+
+        .error-suggestions ul {
+            color: #666;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .error-suggestions li {
+            margin: 8px 0;
+        }
+
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #ff69b4;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #d63384;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+            transform: translateY(-2px);
+        }
+
+        .contact-info {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .contact-info a {
+            color: #d63384;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">😅</div>
+        <h1>Oops! Something went wrong</h1>
+        <p class="error-subtitle">We couldn't process your request</p>
+        
+        {% if error_msg %}
+        <div class="error-message">
+            <strong>Error:</strong> {{ error_msg }}
+        </div>
+        {% endif %}
+
+        <div class="error-suggestions">
+            <h3>💡 Here's what you can try:</h3>
+            <ul>
+                <li>Check your search terms for typos</li>
+                <li>Make sure you've entered at least one search term</li>
+                <li>Try using simpler keywords</li>
+                <li>Switch to a different search engine (Semantic, Boolean, or TF-IDF)</li>
+            </ul>
+        </div>
+
+        <div class="button-group">
+            <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+            <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>
+        </div>
+
+        <div class="contact-info">
+            <p>Still having issues? The problem might be on our end.</p>
+            <p>Feel free to <a href="mailto:support@friendswithallergies.fi">contact us</a> for help.</p>
+        </div>
+    </div>
+</body>
+</html>

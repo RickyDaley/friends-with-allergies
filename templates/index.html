@@ -247,7 +247,52 @@
 
         .no-results li {
             margin: 5px 0;
-        }    
+        }
+
+        /* Matched Dishes Styling (Green Flag Evidence) */
+        .matched-dishes {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .dishes-list {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dish-tag {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .more-dishes {
+            background-color: #81c784;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        /* Filter Info Banner */
+        .filter-info {
+            background-color: #fff3e0;
+            border: 1px solid #ffcc80;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            color: #e65100;
+            text-align: center;
+        }
 
     </style>
 </head>
@@ -305,6 +350,11 @@
             <span class="search-engine">({{ engine|title }} Search)</span>
             {% endif %}
         </div>
+        {% if filtered_count and filtered_count > 0 %}
+        <div class="filter-info">
+            ⚠️ {{ filtered_count }} restaurant{% if filtered_count != 1 %}s{% endif %} filtered out due to allergy concerns (Red Flag active)
+        </div>
+        {% endif %}
         <div id="chart_area">{{ chart_div|safe }}</div>
     </div>
     
@@ -374,6 +424,21 @@
                     </div>
                     {% endif %}
                 </div>
+                
+                <!-- Matched Dishes Section (Green Flag Evidence) -->
+                {% if restaurant.matched_dishes %}
+                <div class="matched-dishes">
+                    <span class="info-label">🍽️ Matched Menu Items ({{ restaurant.total_matches }} total):</span>
+                    <div class="dishes-list">
+                        {% for dish in restaurant.matched_dishes %}
+                        <span class="dish-tag">{{ dish }}</span>
+                        {% endfor %}
+                        {% if restaurant.total_matches > 5 %}
+                        <span class="more-dishes">+{{ restaurant.total_matches - 5 }} more</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 
                 <!-- Page URL Link -->
                 {% if restaurant['Page URL'] %}
