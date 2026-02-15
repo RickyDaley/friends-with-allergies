@@ -236,6 +236,61 @@ def general_allergy_score(all_reviews, embed_reviews, threshold=0.3):
     return positive_proportion
 
 
+def specific_allergy_score(specific_reviews, embed_specific_reviews, allergen, threshold=0.3):
+    specific_query = f"{allergen} allergy safety cross-contamination" 
+
+    specific_ids = semantic_search(specific_query, embed_specific_reviews, threshold=threshold)
+
+    verified_reviews = []
+    for i in specific_ids:
+        text = specific_reviews[i].lower()
+        if allergen.lower() in text or "allergy" in text:
+            verified_reviews.append(specific_reviews[i])
+
+    positive_count = 0
+    negative_count = 0
+
+    for review in verified_reviews:
+        sentiment_score = sentiment_analysis(review)
+        if sentiment_score == 1:
+            positive_count += 1
+        else:
+            negative_count += 1
+    
+    total_allergy_reviews_number = len(verified_reviews)
+    if total_allergy_reviews_number > 0:
+        positive_proportion = positive_count/total_allergy_reviews_number
+    else:
+        positive_proportion = "Neutral" # return "Neutral" as a neutral score if the reviews doesn't have any related to allergy
+
+    return  positive_proportion
+
+
+def rank_restaurants(restaurant_data, allergen, threshold=0.3):
+    final_ranking_list = []
+
+    for restaurant in restaurant_data:
+        current_reviews = restaurant['reviews']
+        current_embeddings = None # got questions about embeddings
+
+        general_allergy_score = general_allergy_score(current_reviews, current_embeddings, threshold)
+        base_score = 0.4 if general_allergy_score == "Neutral" else general_allergy_score
+
+        if general_allergy_score != "Neutral" and general_allergy_score < 0.7:
+            continue
+        specific_allergy_score = specific_allergy_score(current_reviews, current_embeddings, allergen, threshold)
+
+        total_socre = general_allergy_score * 0.3 + specific_allergy_score * 0.7
+        final_ranking_list.append({
+                "name": restaurant['name'],
+                "total_score": total_socre,
+            })
+        
+    # return ranks based on the total score
+    return sorted(final_ranking_list, key=lambda x: x["total_score"], reverse=True)
+        
+
+
 def plot_freq(data, column):
     x, y = np.unique(data[column].values, return_counts=True)
     p = figure()
