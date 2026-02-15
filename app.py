@@ -33,10 +33,12 @@ def switch_engine():
         engine = 'boolean'
         sem_show = False
         bool_tfidf_show = True
-    else:
+    elif 'tf_idf' in request.form:
         engine = 'tf_idf'
         sem_show = False
         bool_tfidf_show = True
+    else:
+        return render_template('error.html', error_msg="Search engine is invalid or does not exist")
     return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show,engine=engine)
 
 
@@ -76,6 +78,8 @@ def get_matching_scores(key_map, matched_docs):
 @app.route('/search_single', methods=['POST'])
 def search_single():
     query = request.form.get('query', '')
+    if not query:
+        return render_template('error.html', error_msg="You forgot to enter a search term.")
     matched_docs = dp.semantic_search(query, embed_compiled_documents, threshold=0.3)
     matches_table, matching_entries = doc_ids_to_data_entries(matched_docs)
     print(matching_entries)
@@ -187,6 +191,13 @@ def search_double():
                          filtered_count=len(filtered_out_info))
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html', error_msg="A page with the URL you've entered does not exist.")
+
+@app.errorhandler(500)
+def internal_error(e):
+    return render_template('error.html', error_msg="Internal Server Error. Our bad, sorry!")
 
 
 # ============== API ENDPOINTS ==============
@@ -323,14 +334,6 @@ curl "http://localhost:5001/api/restaurants?cuisine=Italian&limit=5"
 @app.route('/test500')
 def test_500():
     1 / 0  
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('error.html', error_msg="404 Not Found"), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    return render_template('error.html', error_msg="500 Internal Server Error"), 500
 
 
 if __name__ == "__main__":
