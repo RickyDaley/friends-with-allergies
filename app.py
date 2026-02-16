@@ -83,7 +83,7 @@ def search_single():
     matched_docs = dp.semantic_search(query, embed_compiled_documents, threshold=0.3)
     matches_table, matching_entries = doc_ids_to_data_entries(matched_docs)
     print(matching_entries)
-    script, div, resources = dp.plot_dist(data=pd.DataFrame(matches_table), column="Rating (out of 6)", nbins=7)
+    script, div, resources = dp.plot_stats(data=pd.DataFrame(matches_table))
     
     # Pass the search terms back to template
     return render_template('index.html', 
@@ -175,7 +175,7 @@ def search_double():
             entry['matched_dishes'] = matching_dishes[rest_name][:5]
             entry['total_matches'] = len(matching_dishes[rest_name])
 
-    script, div, resources = dp.plot_dist(data=pd.DataFrame(matches_table), column="Rating (out of 6)", nbins=7)
+    script, div, resources = dp.plot_stats(data=pd.DataFrame(matches_table))
     
     # Pass the search terms back to template
     return render_template('index.html', 

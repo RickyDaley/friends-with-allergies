@@ -357,7 +357,10 @@
             ⚠️ {{ filtered_count }} restaurant{% if filtered_count != 1 %}s{% endif %} filtered out due to allergy concerns (Red Flag active)
         </div>
         {% endif %}
-        <div id="chart_area" style="align-content: center; margin: 10px;">{{ chart_div|safe }}</div>
+        <div id="chart_area" style="align-content: center; margin: 10px;">
+            <h3>Search Result Stats</h3>
+            {{ chart_div|safe }}
+        </div>
     </div>
     
     <!-- Results List -->

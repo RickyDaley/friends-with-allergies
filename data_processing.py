@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import translators as ts
 from bokeh.plotting import figure
+from bokeh.layouts import row
 from bokeh.embed import components
 from bokeh.resources import CDN
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -313,35 +314,41 @@ def rank_restaurants(restaurant_data, allergen, threshold=0.3):
     return sorted(final_ranking_list, key=lambda x: x["total_score"], reverse=True)
         
 
-def plot_dist(data, column, nbins):
-    x_raw = data[column]
-    if column == 'Rating (out of 6)':
-        x_raw = x_raw.apply(lambda x: 0 if math.isnan(x) else x)
-    if column == 'General Allergy Score':
-        def recalculate_gas(score):
-            threshold = 0.25
+def plot_stats(data):
+    def recalculate_gas(score):
             if score == 'Neutral':
                 return 0
             score = float(score)
-            if score <= threshold:
-                return -2 * (score + threshold) - 0.5
-            return (score - threshold) * 2  - 0.5
-        x_raw = x_raw.apply(recalculate_gas)
-    x_raw = x_raw.values
-    counts, bin_edges = np.histogram(x_raw, bins=nbins)
+            return score
+    ratings = data['Rating (out of 6)'].apply(lambda x: 0 if math.isnan(x) else x).values
+    review_counts = data['Review Count'].values
+    allergy_scores = data['General Allergy Score'].apply(recalculate_gas).values
+    counts, bin_edges = np.histogram(allergy_scores, bins=3, range=(0, 1))
     bins = []
-    ndigits = 0 if column == "Review Count" else 1
-    for i in range(nbins):
-        bins.append(f"{round(bin_edges[i], ndigits)} – {round(bin_edges[i + 1], ndigits)}")
+    bin_names = ['Neutral', 'Safe', 'Safest']
+    for i in range(3):
+        bins.append(f"{round(bin_edges[i], 1)} – {round(bin_edges[i + 1], 1)}\n{bin_names[i]}")
 
-    #x, y = np.unique(x_raw, return_counts=True)
-    p = figure(x_range=bins, height=350, width=800, title="Distribution of " + column,
-           toolbar_location=None, tools="")
-    p.vbar(x=bins, top=counts, width=0.9)
-    p.xgrid.grid_line_color = None
-    p.y_range.start = 0
+    p1 = figure(height=300, title="Rating VS Number of reviews ",
+           toolbar_location=None)
+    p2 = figure(x_range=bins, height=300, title="Distribution of General Allergy Scores",
+           toolbar_location=None)
     
-    script, div = components(p)
+    p1.scatter(x=ratings, y=review_counts, color="#6CAF61", size=10, alpha=0.3)
+    p1.background_fill_alpha = 0
+    p1.border_fill_alpha = 0
+    p1.y_range.start = 0
+    p1.sizing_mode = "stretch_width"
+
+    p2.vbar(x=bins, top=counts, width=0.9, color="#6CAF61", alpha=0.3)
+    p2.xgrid.grid_line_color = None
+    p2.background_fill_alpha = 0
+    p2.border_fill_alpha = 0
+    p2.y_range.start = 0
+    p2.sizing_mode = "stretch_width"
+
+    viz_row = row(p1, p2, sizing_mode="stretch_width")
+    script, div = components(viz_row)
     return script, div, CDN.render()
 
 
