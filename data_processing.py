@@ -1,11 +1,11 @@
 import os
 import json
+import math
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 import numpy as np
 import pandas as pd
 import translators as ts
-from math import inf
 from bokeh.plotting import figure
 from bokeh.embed import components
 from bokeh.resources import CDN
@@ -70,6 +70,26 @@ def translate_list(text_entries):
         transl_chunk = translate_chunk(chunk)
         transl_entries.extend(transl_chunk.split('\n'))
     return transl_entries
+
+
+def json_file_to_dict(path):
+    with open(path, 'r', encoding='utf-8') as f:
+        contents = f.read()
+        d = json.loads(contents)
+    for key, val in d.items():
+        d[key] = np.asarray(val)
+    return d
+
+
+def load_review_embeds(dir_path):
+    dict_readed = {}
+    for filename in os.listdir(dir_path):
+        with open(os.path.join(dir_path, filename), 'r', encoding='utf-8') as f:
+            contents = f.read()
+            val = json.loads(contents)
+        key = filename.replace(".txt", "").replace("_", "/")
+        dict_readed[key] = np.asarray(val)
+    return dict_readed
     
 
 def initialise_index():
@@ -82,10 +102,13 @@ def initialise_index():
     for _, row in data.iterrows():
         rest_reviews = reviews[reviews.Restaurant == row.Name]["Review Text Eng"].values
         review_dict[row.Name] = rest_reviews
-        embed_review_dict[row.Name] = model.encode(rest_reviews)
+        #embed_review_dict[row.Name] = model.encode(rest_reviews)
         rest_menu = menus[menus.Restaurant == row.Name]["Menu Eng"].values
         menu_dict[row.Name] = rest_menu
-        embed_menu_dict[row.Name] = model.encode(rest_menu)
+        #embed_menu_dict[row.Name] = model.encode(rest_menu)
+    # Load pre-saved embeddings
+    embed_review_dict = load_review_embeds(absolute_path("data/embed_review_dict"))
+    embed_menu_dict = json_file_to_dict(absolute_path("data/embed_menu_dict.json"))
     return data, review_dict, menu_dict, embed_review_dict, embed_menu_dict
 
 
@@ -100,7 +123,7 @@ def rewrite_query(query):
     tokens = query.split()
     operators = ("and", "or", "not", "&", "|", "(", ")")
     parts = []
-    min_ngram_size, max_ngram_size = inf, 1
+    min_ngram_size, max_ngram_size = math.inf, 1
     current_ngram = []
     for i, t in enumerate(tokens):
         if t in operators or i == len(tokens) - 1:
@@ -170,7 +193,7 @@ def tf_idf_search(query, documents):
 
 
 def semantic_search(query, doc_embeddings, threshold=0.25):
-    if query is None or doc_embeddings is None or doc_embeddings.shape == (0,):
+    if query is None or doc_embeddings is None or np.array(doc_embeddings).shape == (0,):
         return []
     query_embedding = model.encode(query)
     cosine_similarities = np.dot(query_embedding, doc_embeddings.T)
@@ -290,11 +313,34 @@ def rank_restaurants(restaurant_data, allergen, threshold=0.3):
     return sorted(final_ranking_list, key=lambda x: x["total_score"], reverse=True)
         
 
+def plot_dist(data, column, nbins):
+    x_raw = data[column]
+    if column == 'Rating (out of 6)':
+        x_raw = x_raw.apply(lambda x: 0 if math.isnan(x) else x)
+    if column == 'General Allergy Score':
+        def recalculate_gas(score):
+            threshold = 0.25
+            if score == 'Neutral':
+                return 0
+            score = float(score)
+            if score <= threshold:
+                return -2 * (score + threshold) - 0.5
+            return (score - threshold) * 2  - 0.5
+        x_raw = x_raw.apply(recalculate_gas)
+    x_raw = x_raw.values
+    counts, bin_edges = np.histogram(x_raw, bins=nbins)
+    bins = []
+    ndigits = 0 if column == "Review Count" else 1
+    for i in range(nbins):
+        bins.append(f"{round(bin_edges[i], ndigits)} – {round(bin_edges[i + 1], ndigits)}")
 
-def plot_freq(data, column):
-    x, y = np.unique(data[column].values, return_counts=True)
-    p = figure()
-    p.scatter(x, y)
+    #x, y = np.unique(x_raw, return_counts=True)
+    p = figure(x_range=bins, height=350, width=800, title="Distribution of " + column,
+           toolbar_location=None, tools="")
+    p.vbar(x=bins, top=counts, width=0.9)
+    p.xgrid.grid_line_color = None
+    p.y_range.start = 0
+    
     script, div = components(p)
     return script, div, CDN.render()
 

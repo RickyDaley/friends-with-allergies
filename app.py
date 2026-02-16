@@ -83,7 +83,7 @@ def search_single():
     matched_docs = dp.semantic_search(query, embed_compiled_documents, threshold=0.3)
     matches_table, matching_entries = doc_ids_to_data_entries(matched_docs)
     print(matching_entries)
-    script, div, resources = dp.plot_freq(pd.DataFrame(matches_table), 'Rating (out of 6)')
+    script, div, resources = dp.plot_dist(data=pd.DataFrame(matches_table), column="Rating (out of 6)", nbins=7)
     
     # Pass the search terms back to template
     return render_template('index.html', 
@@ -175,7 +175,7 @@ def search_double():
             entry['matched_dishes'] = matching_dishes[rest_name][:5]
             entry['total_matches'] = len(matching_dishes[rest_name])
 
-    script, div, resources = dp.plot_freq(pd.DataFrame(matches_table), 'Rating (out of 6)')
+    script, div, resources = dp.plot_dist(data=pd.DataFrame(matches_table), column="Rating (out of 6)", nbins=7)
     
     # Pass the search terms back to template
     return render_template('index.html', 
@@ -338,4 +338,4 @@ def test_500():
 
 if __name__ == "__main__":
     #Change the Flask app to run on a different port than 5000 to prevent port 5000 being used by AirTunes problem
-    app.run(debug=False, port=5001) # change debug to false to see the custom 500 error pages instead of Flask's default error pages
+    app.run(debug=True, port=5001) # change debug to false to see the custom 500 error pages instead of Flask's default error pages

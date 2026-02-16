@@ -1,4 +1,7 @@
 ipykernel
+os
+json
+numpy
 pandas
 requests
 beautifulsoup4
