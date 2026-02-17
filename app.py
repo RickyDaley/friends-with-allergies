@@ -142,7 +142,12 @@ def search_double():
     
     # ============== RED FLAG FILTERING (Issue #36) ==============
     # If red flag is specified, filter out restaurants with low general allergy score
+    # AND rank the remaining ones by specific allergy score
     filtered_out_info = []
+    
+    # Store ranking details if applicable
+    ranking_scores = {}
+    
     if query_no:
         # Apply general allergy score filtering
         matched_restaurant_names, filtered_out_info = dp.filter_by_general_allergy_score(
@@ -151,6 +156,22 @@ def search_double():
             embed_review_dict,
             threshold=dp.RED_FLAG_NEGATIVE_THRESHOLD
         )
+        
+        # Rank the remaining restaurants
+        ranked_list = dp.rank_restaurants(
+            matched_restaurant_names,
+            review_dict,
+            embed_review_dict,
+            allergen=query_no,
+            threshold=0.3
+        )
+        
+        # Update matched names with the sorted list
+        matched_restaurant_names = [item['name'] for item in ranked_list]
+        
+        # Store scores for display
+        for item in ranked_list:
+            ranking_scores[item['name']] = item['total_score']
     
     # Handle case where no restaurants match
     if not matched_restaurant_names:
@@ -167,13 +188,26 @@ def search_double():
     matching_ids = [list(menu_dict.keys()).index(name) for name in matched_restaurant_names if name in menu_dict.keys()]
     matches_table, matching_entries = doc_ids_to_data_entries(matching_ids)
     
+    # Sort matching_entries again based on matched_restaurant_names order
+    # Create a mapping from name to index in the ranked list
+    name_to_rank_index = {name: i for i, name in enumerate(matched_restaurant_names)}
+    
+    # Sort entries based on their index in the ranked list
+    matching_entries.sort(key=lambda x: name_to_rank_index.get(x['Name'], float('inf')))
+    
     # Add matched dishes info to each restaurant entry for display
     for entry in matching_entries:
         rest_name = entry.get('Name', '')
+        
+        # Add matched dishes
         if rest_name in matching_dishes:
-            # Limit to first 5 matched dishes for display
-            entry['matched_dishes'] = matching_dishes[rest_name][:5]
+            # Limit to first 10 matched dishes for display to avoid crushing of the application
+            entry['matched_dishes'] = matching_dishes[rest_name][:10]
             entry['total_matches'] = len(matching_dishes[rest_name])
+            
+        # Add ranking score
+        if rest_name in ranking_scores:
+            entry['allergy_score'] = round(ranking_scores[rest_name], 2)
 
     script, div, resources = dp.plot_stats(data=pd.DataFrame(matches_table))
     

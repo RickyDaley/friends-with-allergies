@@ -260,57 +260,60 @@ def general_allergy_score(all_reviews, embed_reviews, threshold=0.3):
     return positive_proportion
 
 
-def specific_allergy_score(specific_reviews, embed_specific_reviews, allergen, threshold=0.3):
-    specific_query = f"{allergen} allergy safety cross-contamination" 
+def specific_allergy_score(all_reviews, embed_reviews, allergen, threshold=0.3):
+    # Semantic search to match specific allergen
+    specific_ids = semantic_search(allergen, embed_reviews, threshold=threshold)
 
-    specific_ids = semantic_search(specific_query, embed_specific_reviews, threshold=threshold)
-
-    verified_reviews = []
+    specific_allergy_reviews = []
     for i in specific_ids:
-        text = specific_reviews[i].lower()
-        if allergen.lower() in text or "allergy" in text:
-            verified_reviews.append(specific_reviews[i])
+        specific_allergy_reviews.append(all_reviews[i])
 
     positive_count = 0
-    negative_count = 0
-
-    for review in verified_reviews:
+    # Sentiment Analysis on specific allergy reviews: positive for 1, neutral for 0
+    for review in specific_allergy_reviews:
         sentiment_score = sentiment_analysis(review)
         if sentiment_score == 1:
             positive_count += 1
-        else:
-            negative_count += 1
     
-    total_allergy_reviews_number = len(verified_reviews)
-    if total_allergy_reviews_number > 0:
-        positive_proportion = positive_count/total_allergy_reviews_number
+    total_reviews = len(specific_allergy_reviews)
+    if total_reviews > 0:
+        return positive_count / total_reviews
     else:
-        positive_proportion = "Neutral" # return "Neutral" as a neutral score if the reviews doesn't have any related to allergy
-
-    return  positive_proportion
+        return "Neutral"
 
 
-def rank_restaurants(restaurant_data, allergen, threshold=0.3):
+def rank_restaurants(restaurant_names, review_dict, embed_review_dict, allergen, threshold=0.3):
     final_ranking_list = []
 
-    for restaurant in restaurant_data:
-        current_reviews = restaurant['reviews']
-        current_embeddings = None # got questions about embeddings
-
-        general_allergy_score = general_allergy_score(current_reviews, current_embeddings, threshold)
-        base_score = 0.4 if general_allergy_score == "Neutral" else general_allergy_score
-
-        if general_allergy_score != "Neutral" and general_allergy_score < 0.7:
+    for name in restaurant_names:
+        if name not in review_dict or name not in embed_review_dict:
             continue
-        specific_allergy_score = specific_allergy_score(current_reviews, current_embeddings, allergen, threshold)
 
-        total_socre = general_allergy_score * 0.3 + specific_allergy_score * 0.7
+        current_reviews = review_dict[name]
+        current_embeddings = embed_review_dict[name]
+
+        general_score = general_allergy_score(current_reviews, current_embeddings, threshold)
+        
+        # If no allergy reviews for general reviews, give a default base score 0.4
+        if general_score == "Neutral":
+            base_score = 0.4 
+        else:
+            base_score = general_score
+
+        specific_score = specific_allergy_score(current_reviews, current_embeddings, allergen, threshold)
+        
+        # If no allergy reviews for specific allergen, give a default base score 0.4
+        if specific_score == "Neutral":
+            specific_score = 0.4 
+        else:
+            specific_score = specific_score
+
+        total_score = base_score * 0.35 + specific_score * 0.65
         final_ranking_list.append({
-                "name": restaurant['name'],
-                "total_score": total_socre,
+                "name": name,
+                "total_score": total_score,
             })
         
-    # return ranks based on the total score
     return sorted(final_ranking_list, key=lambda x: x["total_score"], reverse=True)
         
 
