@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{ chart_resources|safe }}
     <title>Friends with allergies</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+        rel="stylesheet" 
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" 
+        crossorigin="anonymous">
+
+    <!-- Bootstrap 5.3 JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" 
+        crossorigin="anonymous"></script>
+    
     <style>
         body {
             background-image: url('/static/green1.jpg');
@@ -295,7 +306,12 @@
             color: #e65100;
             text-align: center;
         }
-
+        
+        button.switch_True {
+            background-color: #44624a !important;
+            color: white !important;
+            box-shadow: 0 0 0 3px rgba(68, 98, 74, 0.5);
+        }
     </style>
 </head>
 <header>
@@ -307,17 +323,43 @@
     	<h1>Friends with allergies</h1>
     </header>
     
-    <nav>
-        <form action="/switch" method="post">
-            <button type="submit" id="semantic_switch" name="semantic" class="switch_{{ engine == 'semantic' }}">Semantic Search</button>
-        </form>
-        <form action="/switch" method="post">
-            <button type="submit" id="boolean_switch" name="boolean" class="switch_{{ engine == 'boolean' }}">Boolean Search</button>
-        </form>
-        <form action="/switch" method="post">
-            <button type="submit" id="tf_idf_switch" name="tf_idf" class="switch_{{ engine == 'tf_idf' }}">TF-IDF Search</button>
-        </form>
- 	</nav>
+    <nav style="display: flex; justify-content: center; gap: 20px; margin: 30px 0;">
+    <form action="/switch" method="post">
+        <button type="submit" 
+                id="semantic_switch" 
+                name="semantic" 
+                class="switch_{{ engine == 'semantic' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-title="Find restaurants based on meaning & context of the query — best for natural language → example: 'cozy vegan place near sea with good desserts'">
+            Semantic Search
+        </button>
+    </form>
+
+    <form action="/switch" method="post">
+        <button type="submit" 
+                id="boolean_switch" 
+                name="boolean" 
+                class="switch_{{ engine == 'boolean' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-title="Use logical operators to connect query's keywords: AND / OR / NOT → example: sushi AND (vegan OR vegetarian) NOT expensive">
+            Boolean Search
+        </button>
+    </form>
+
+    <form action="/switch" method="post">
+        <button type="submit" 
+                id="tf_idf_switch" 
+                name="tf_idf" 
+                class="switch_{{ engine == 'tf_idf' }}"
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                data-bs-title="Classic keyword ranking — good when you want exact word matches ordered by its importance (TF-IDF score)">
+            TF-IDF Search
+        </button>
+    </form>
+</nav>
     
     <article>
         {% if sem_show %}
@@ -546,7 +588,15 @@
 
 }
 </script>
-
+<script>
+    // Initialize all Bootstrap tooltips on the page
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        [...tooltipTriggerList].forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 
 </body>
 </html>
