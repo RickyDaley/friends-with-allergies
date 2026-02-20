@@ -162,13 +162,15 @@
         }
 
         .image-column {
-            flex: 0 0 280px;        
+            flex: 0 0 320px;
+            margin-top: 3.5rem;
+            align-self: flex-start;        
         }
 
         .restaurant-photo {
             width: 100%;
             height: auto;
-            max-height: 240px;      
+            max-height: 280px;      
             object-fit: cover;     
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.12);
@@ -192,7 +194,7 @@
             margin: 0 auto 20px;
             }
         }
-        
+
         .restaurant-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -450,127 +452,127 @@
     </div>
     
     <!-- Results List -->
-    <div class="restaurant-card">
+    <div class="results-container">
         {% if matches|length > 0 %}
             {% for restaurant in matches %}
-            <div class="card-content">
-                <div class="info-column">
+                <div class="restaurant-card">
+                    <div class="card-content">
+                        <div class="info-column">
 
-                    <!-- Restaurant Name -->
-                    <h3 class="restaurant-name">{{ restaurant.Name }}</h3>
+                            <!-- Restaurant Name -->
+                            <h3 class="restaurant-name">{{ restaurant.Name }}</h3>
 
-                    <!-- Basic Info Grid -->
-                    <div class="restaurant-info">
-                    
-                        {% if restaurant.Location %}
-                        <div class="info-item">
-                            <span class="info-label">📍 Location:</span>
-                            <span class="info-value">{{ restaurant.Location }}</span>
-                        </div>
-                        {% endif %}
-                    
-                        {% if restaurant.Cuisine %}
-                        <div class="info-item">
-                            <span class="info-label">🌍 Cuisine:</span>
-                            <span class="info-value">{{ restaurant.Cuisine }}</span>
-                        </div>
-                        {% endif %}
-                    
-                        {% if restaurant.Meals %}
-                            <div class="info-item">
-                            <span class="info-label">🍽️ Meals:</span>
-                            <span class="info-value">{{ restaurant.Meals }}</span>
-                        </div>
-                        {% endif %}
-                    
-                        {% if restaurant['Price Level (out of 4)'] %}
-                        <div class="info-item">
-                            <span class="info-label">💰 Price Level:</span>
-                            <span class="info-value">
-                                {% set price_level = restaurant['Price Level (out of 4)'] %}
-                                {% if price_level is number %}
-                                    {{ '$' * price_level|int }} ({{ price_level }}/4)
-                                {% else %}
-                                    {{ price_level }}/4
+                            <!-- Basic Info Grid -->
+                            <div class="restaurant-info">
+
+                                {% if restaurant.Location %}
+                                <div class="info-item">
+                                    <span class="info-label">📍 Location:</span>
+                                    <span class="info-value">{{ restaurant.Location }}</span>
+                                </div>
                                 {% endif %}
-                            </span>
-                        </div>
-                        {% endif %}
-                    
-                        {% if restaurant['Rating (out of 6)'] %}
-                        <div class="info-item">
-                            <span class="info-label">⭐ Rating:</span>
-                            <span class="info-value">
-                                {% set rating = restaurant['Rating (out of 6)'] %}
-                                {% if rating is number %}
-                                    {{ rating|round(1) }}/6
-                                {% else %}
-                                    {{ rating }}/6
+
+                                {% if restaurant.Cuisine %}
+                                <div class="info-item">
+                                    <span class="info-label">🌍 Cuisine:</span>
+                                    <span class="info-value">{{ restaurant.Cuisine }}</span>
+                                </div>
                                 {% endif %}
-                            </span>
-                        </div>
-                        {% endif %}
                     
-                        {% if restaurant['Review Count'] %}
-                        <div class="info-item">
-                            <span class="info-label">📊 Reviews:</span>
-                            <span class="info-value">{{ restaurant['Review Count'] }} reviews</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                
-                    {% if restaurant['Image URL'] and restaurant['Image URL']|length > 5 %}
-                    <div class="image-column">
-                        <img src="{{ restaurant['Image URL'] }}" 
-                            alt="{{ restaurant.Name }} photo" 
-                            loading="lazy"
-                            class="restaurant-photo">
-                    </div>
-                    {% endif %}
-        
+                                {% if restaurant.Meals %}
+                                <div class="info-item">
+                                    <span class="info-label">🍽️ Meals:</span>
+                                    <span class="info-value">{{ restaurant.Meals }}</span>
+                                </div>
+                                {% endif %}
                     
-                    <!-- Matched Dishes Section (Green Flag Evidence) -->
-                    {% if restaurant.matched_dishes %}
-                    <div class="matched-dishes">
-                        <span class="info-label">🍽️ Matched Menu Items ({{ restaurant.total_matches }} total):</span>
-                        <div class="dishes-list">
-                            {% for dish in restaurant.matched_dishes %}
-                            <span class="dish-tag">{{ dish }}</span>
-                            {% endfor %}
-                            {% if restaurant.total_matches > 5 %}
-                            <span class="more-dishes">+{{ restaurant.total_matches - 5 }} more</span>
+                                {% if restaurant['Price Level (out of 4)'] %}
+                                <div class="info-item">
+                                    <span class="info-label">💰 Price Level:</span>
+                                    <span class="info-value">
+                                        {% set price_level = restaurant['Price Level (out of 4)'] %}
+                                        {% if price_level is number %}
+                                            {{ '$' * price_level|int }} ({{ price_level }}/4)
+                                        {% else %}
+                                            {{ price_level }}/4
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                    
+                                {% if restaurant['Rating (out of 6)'] %}
+                                <div class="info-item">
+                                    <span class="info-label">⭐ Rating:</span>
+                                    <span class="info-value">
+                                        {% set rating = restaurant['Rating (out of 6)'] %}
+                                        {% if rating is number %}
+                                            {{ rating|round(1) }}/6
+                                        {% else %}
+                                            {{ rating }}/6
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endif %}
+                    
+                                {% if restaurant['Review Count'] %}
+                                <div class="info-item">
+                                    <span class="info-label">📊 Reviews:</span>
+                                    <span class="info-value">{{ restaurant['Review Count'] }} reviews</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                    
+                            <!-- Matched Dishes Section (Green Flag Evidence) -->
+                            {% if restaurant.matched_dishes %}
+                            <div class="matched-dishes">
+                                <span class="info-label">🍽️ Matched Menu Items ({{ restaurant.total_matches }} total):</span>
+                                <div class="dishes-list">
+                                    {% for dish in restaurant.matched_dishes %}
+                                    <span class="dish-tag">{{ dish }}</span>
+                                    {% endfor %}
+                                    {% if restaurant.total_matches > 5 %}
+                                    <span class="more-dishes">+{{ restaurant.total_matches - 5 }} more</span>
+                                    {% endif %}
+                                </div>
+                            </div>
                             {% endif %}
+
                         </div>
+
+                        {% if restaurant['Image URL'] and restaurant['Image URL']|length > 5 %}
+                        <div class="image-column">
+                            <img src="{{ restaurant['Image URL'] }}" 
+                                alt="{{ restaurant.Name }} photo" 
+                                loading="lazy"
+                                class="restaurant-photo">
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+            
+                    <!-- Page URL Link -->
+                    {% if restaurant['Page URL'] %}
+                    <div class="page-link">
+                        <a href="https://www.quandoo.fi{{ restaurant['Page URL'] }}" target="_blank" class="visit-button">
+                            🔗 Visit Restaurant Page
+                        </a>
                     </div>
                     {% endif %}
                 
-    
-            </div>
-        </div>
-
-
-                <!-- Page URL Link -->
-                {% if restaurant['Page URL'] %}
-                <div class="page-link">
-                    <a href="https://www.quandoo.fi{{ restaurant['Page URL'] }}" target="_blank" class="visit-button">
-                        🔗 Visit Restaurant Page
-                    </a>
-                </div>
-                {% endif %}
-                
-                <!-- Optional: Debug section (remove in production) -->
-                <details style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 0.9em;">
-                    <summary style="cursor: pointer; color: #666;">🔍 Show all data fields</summary>
-                    <div style="text-align: left; margin-top: 10px; font-family: monospace;">
-                        {% for key, value in restaurant.items() %}
-                        <div style="margin: 5px 0; padding: 3px; background: white; border-radius: 3px;">
-                            <strong>{{ key }}:</strong> 
-                            <span>{{ value }}</span>
+                    <!-- Optional: Debug section (remove in production) -->
+                    <details style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 0.9em;">
+                        <summary style="cursor: pointer; color: #666;">🔍 Show all data fields</summary>
+                        <div style="text-align: left; margin-top: 10px; font-family: monospace;">
+                            {% for key, value in restaurant.items() %}
+                            <div style="margin: 5px 0; padding: 3px; background: white; border-radius: 3px;">
+                                <strong>{{ key }}:</strong> 
+                                <span>{{ value }}</span>
+                            </div>
+                            {% endfor %}
                         </div>
-                        {% endfor %}
-                    </div>
-                </details>
-            </div>
+                    </details>
+                </div>
+
             {% endfor %}
         {% else %}
             <!-- No Results Message -->
@@ -580,6 +582,7 @@
             </div>
         {% endif %}
     </div>
+
 </article>
 {% endif %}
 
