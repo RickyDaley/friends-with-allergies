@@ -9,14 +9,13 @@ engine = 'semantic'
 sem_show, bool_tfidf_show = True, False
 
 data = pd.DataFrame()
-review_dict, menu_dict, embed_review_dict, embed_menu_dict = {}, {}, {}, {}
+review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = {}, {}, {}, {}, {}
 embed_compiled_documents = []
-
 
 @app.route('/')
 def init():
-    global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, compiled_documents, embed_compiled_documents
-    data, review_dict, menu_dict, embed_review_dict, embed_menu_dict = dp.initialise_index()
+    global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict, compiled_documents, embed_compiled_documents
+    data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = dp.initialise_index()
     compiled_documents = ['\n'.join(menu_dict[key]) + '\n' + '\n'.join(review_dict[key]) for key in menu_dict.keys()]
     embed_compiled_documents = dp.model.encode(compiled_documents)
     return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show)
@@ -83,9 +82,11 @@ def search_single():
     matched_docs = dp.semantic_search(query, embed_compiled_documents, threshold=0.3)
     matches_table, matching_entries = doc_ids_to_data_entries(matched_docs)
     print(matching_entries)
+    for entry in matching_entries:
+        rest_name = str(entry.get('Name', '')).strip()
+        entry['extra_images'] = pictures_dict.get(rest_name, [])
     script, div, resources = dp.plot_stats(data=pd.DataFrame(matches_table))
     
-    # Pass the search terms back to template
     return render_template('index.html', 
                          sem_show=sem_show, 
                          bool_tfidf_show=bool_tfidf_show, 
@@ -195,6 +196,10 @@ def search_double():
     # Sort entries based on their index in the ranked list
     matching_entries.sort(key=lambda x: name_to_rank_index.get(x['Name'], float('inf')))
     
+    for entry in matching_entries:
+        rest_name = str(entry.get('Name', '')).strip()
+        entry['extra_images'] = pictures_dict.get(rest_name, [])
+
     # Add matched dishes info to each restaurant entry for display
     for entry in matching_entries:
         rest_name = entry.get('Name', '')
@@ -335,6 +340,12 @@ def api_health():
         'documents_indexed': len(documents)
     })
 
+@app.route('/restaurant_photos/<path:restaurant_name>')
+def restaurant_photos(restaurant_name):
+    images = pictures_dict.get(restaurant_name.strip(), [])
+    return render_template('photo_gallery.html',
+                           restaurant_name=restaurant_name,
+                           images=images)
 """
 =============================================================================
 API TESTING COMMANDS (run in terminal while Flask is running)

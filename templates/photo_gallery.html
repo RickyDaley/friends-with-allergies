@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photos – {{ restaurant_name }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #44624a;
+            margin-bottom: 30px;
+        }
+    
+        .gallery {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;    
+            max-width: 100%;
+            margin: 0 auto;
+            padding-bottom: 40px;
+        }
+    
+        .gallery img {
+
+            width: auto;            
+            height: auto;          
+            max-width: 100%;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            transition: box-shadow 0.3s ease;
+        }
+    
+        .gallery img:hover {
+            box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+        }
+    
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            padding: 12px 28px;
+            background-color: #8ba888;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    
+        .back-link:hover {
+            background-color: #44624a;
+        }
+    
+        .no-photos {
+            font-size: 1.3em;
+            color: #666;
+            margin: 60px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>More Photos – {{ restaurant_name }}</h1>
+
+    {% if images %}
+        <div class="gallery">
+            {% for url in images %}
+            <img src="{{ url }}" alt="Photo of {{ restaurant_name }}" loading="lazy">
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-photos">No additional photos available for this restaurant.</p>
+    {% endif %}
+
+    <p style="margin-top: 40px; color: #666; font-size: 0.95em;">
+        Close this tab to return to search results
+    </p>
+</body>
+</html>

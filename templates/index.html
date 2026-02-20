@@ -163,7 +163,7 @@
 
         .image-column {
             flex: 0 0 320px;
-            margin-top: 3.5rem;
+            margin-top: 4rem;
             align-self: flex-start;        
         }
 
@@ -539,15 +539,28 @@
 
                         </div>
 
-                        {% if restaurant['Image URL'] and restaurant['Image URL']|length > 5 %}
-                        <div class="image-column">
-                            <img src="{{ restaurant['Image URL'] }}" 
-                                alt="{{ restaurant.Name }} photo" 
-                                loading="lazy"
-                                class="restaurant-photo">
-                        </div>
-                        {% endif %}
-                        
+                            {% if restaurant.get('Image URL') and restaurant['Image URL']|length > 5 %}
+                            <div class="image-column">
+                                {% if restaurant.extra_images %}
+                                <a href="{{ url_for('restaurant_photos', restaurant_name=restaurant.Name) }}"
+                                    target="_blank"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Click to see more photos">
+                                    <img src="{{ restaurant['Image URL'] }}" 
+                                        alt="{{ restaurant.Name }} photo" 
+                                        loading="lazy"
+                                        class="restaurant-photo">
+                                </a>
+                                {% else %}
+                                <img src="{{ restaurant['Image URL'] }}" 
+                                    alt="{{ restaurant.Name }} photo" 
+                                    loading="lazy"
+                                    class="restaurant-photo">
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
                     </div>
             
                     <!-- Page URL Link -->

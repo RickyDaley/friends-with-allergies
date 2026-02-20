@@ -91,7 +91,36 @@ def load_review_embeds(dir_path):
         key = filename.replace(".txt", "").replace("_", "/")
         dict_readed[key] = np.asarray(val)
     return dict_readed
+
+def load_restaurant_pictures():
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    absolute_path = lambda x: os.path.join(__location__, x)
     
+    pictures_path = absolute_path("data_raw/restaurant_pictures.csv")
+    
+    try:
+        df = pd.read_csv(pictures_path, sep='\t',quotechar='"',doublequote=True,escapechar='\\',on_bad_lines='warn')
+        pictures_dict = {}
+        
+        for _, row in df.iterrows():
+            name = str(row['Restaurant']).strip()
+            images_str = str(row.get('Images', '')).strip()
+            
+            if not images_str or images_str.lower() in ['nan', 'none', '']:
+                continue
+                
+            urls = [u.strip() for u in images_str.split(', ') if u.strip()]
+            pictures_dict[name] = urls
+        
+        print(f"Loaded {len(pictures_dict)} restaurants with additional photos")
+        return pictures_dict
+    
+    except FileNotFoundError:
+        print(f"Warning: {pictures_path} not found. No extra photos available.")
+        return {}
+    except Exception as e:
+        print(f"Error loading restaurant_pictures.csv: {e}")
+        return {}
 
 def initialise_index():
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -99,7 +128,7 @@ def initialise_index():
     data = pd.read_csv(absolute_path("data/restaurant_data.csv"), sep="\t", index_col=0)
     reviews = pd.read_csv(absolute_path("data/translated_review_data.csv"), sep="\t", index_col=0, lineterminator='\n')
     menus = pd.read_csv(absolute_path("data/translated_menu_data.csv"), sep="\t", index_col=0)
-    review_dict, menu_dict, embed_review_dict, embed_menu_dict = {}, {}, {}, {}
+    review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = {}, {}, {}, {}, {}
     for _, row in data.iterrows():
         rest_reviews = reviews[reviews.Restaurant == row.Name]["Review Text Eng"].values
         review_dict[row.Name] = rest_reviews
@@ -110,7 +139,11 @@ def initialise_index():
     # Load pre-saved embeddings
     embed_review_dict = load_review_embeds(absolute_path("data/embed_review_dict"))
     embed_menu_dict = json_file_to_dict(absolute_path("data/embed_menu_dict.json"))
-    return data, review_dict, menu_dict, embed_review_dict, embed_menu_dict
+    
+    # Load pictures
+    pictures_dict = load_restaurant_pictures()
+    
+    return data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict
 
 
 def extract_lemmas(docs):
