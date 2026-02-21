@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import translators as ts
 from bokeh.plotting import figure
-from bokeh.layouts import row
+from bokeh.layouts import row, Spacer
 from bokeh.embed import components
 from bokeh.resources import CDN
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -121,6 +121,7 @@ def load_restaurant_pictures():
     except Exception as e:
         print(f"Error loading restaurant_pictures.csv: {e}")
         return {}
+
 
 def initialise_index():
     __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -355,6 +356,8 @@ def plot_stats(data):
             if score == 'Neutral':
                 return 0
             score = float(score)
+            if score < 0.7:
+                return score + 0.3
             return score
     ratings = data['Rating (out of 6)'].apply(lambda x: 0 if math.isnan(x) else x).values
     review_counts = data['Review Count'].values
@@ -365,25 +368,37 @@ def plot_stats(data):
     for i in range(3):
         bins.append(f"{round(bin_edges[i], 1)} – {round(bin_edges[i + 1], 1)}\n{bin_names[i]}")
 
-    p1 = figure(height=300, title="Rating VS Number of reviews ",
+    p1 = figure(height=300, title="Rating Density",
            toolbar_location=None)
     p2 = figure(x_range=bins, height=300, title="Distribution of General Allergy Scores",
            toolbar_location=None)
     
     p1.scatter(x=ratings, y=review_counts, color="#6CAF61", size=10, alpha=0.3)
+    p1.title.text_font = "Futura"
+    p1.title.text_font_style = "bold"
+    p1.yaxis.axis_label = "Number of reviews"
+    p1.yaxis.axis_label_text_font = "Futura"
+    p1.xaxis.axis_label = "Rating (out of 6)"
+    p1.xaxis.axis_label_text_font = "Futura"
     p1.background_fill_alpha = 0
     p1.border_fill_alpha = 0
     p1.y_range.start = 0
     p1.sizing_mode = "stretch_width"
 
     p2.vbar(x=bins, top=counts, width=0.9, color="#6CAF61", alpha=0.3)
+    p2.title.text_font = "Futura"
+    p2.title.text_font_style = "bold"
+    p2.yaxis.axis_label = "Number of restaurants"
+    p2.yaxis.axis_label_text_font = "Futura"
+    p2.xaxis.axis_label = "General Allergy Score"
+    p2.xaxis.axis_label_text_font = "Futura"
     p2.xgrid.grid_line_color = None
     p2.background_fill_alpha = 0
     p2.border_fill_alpha = 0
     p2.y_range.start = 0
     p2.sizing_mode = "stretch_width"
 
-    viz_row = row(p1, p2, sizing_mode="stretch_width")
+    viz_row = row(p1, Spacer(width=20), p2, sizing_mode="stretch_width")
     script, div = components(viz_row)
     return script, div, CDN.render()
 

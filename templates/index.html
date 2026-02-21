@@ -18,22 +18,24 @@
     
     <style>
         body {
-            background-image: url('/static/green1.jpg');
+            /* background-image: url('/static/green1.jpg'); */
+            background-color: #cddab6;
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
             background-repeat: no-repeat;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Futura', 'Trebuchet MS', sans-serif;
             text-align: center;
             padding: 50px;
         }
 
-        h1 {
+        h1 a {
             display: inline-block;
             color: #44624a;
-            background-color: #d1d3d280;
+            font-weight: bolder;
+            text-decoration: none;
             padding: 10px 10px;
-            font-size: 3em;
+            font-size: 2em;
             cursor: pointer;
         }
 
@@ -366,7 +368,7 @@
 <body>
 <section>
     <header>
-    	<h1>Friends with allergies</h1>
+    	<h1><a href="/">Friends with allergies</a></h1>
     </header>
     
     <nav style="display: flex; justify-content: center; gap: 20px; margin: 30px 0;">
@@ -389,7 +391,7 @@
                 class="switch_{{ engine == 'boolean' }}"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                data-bs-title="Use logical operators to connect query's keywords: 'and', 'or', 'not' → example: sushi and (vegan or vegetarian) not expensive">
+                data-bs-title="Use logical operators to connect query's keywords: 'and', 'or', 'not' → example: sushi and (vegan or vegetarian)">
             Boolean Search
         </button>
     </form>
@@ -431,14 +433,20 @@
     </article>
     {% if matches is not none %}
 <article class="results-section">
+    {% if first_load %}
+     <!-- Welcome Message -->
+        <div class="no-results">
+            <h3>Welcome to the FwA restaurant search tool!</h3>
+            <p>Enter your gastronomical wishes and concers, and we'll find you the best places and dishes in Helsinki which fully match your needs.</p>
+        </div>   
+    {% else %}
     <!-- Result Header -->
     <div class="results-header">
-        <h2>Search Results</h2>
+        {% if engine %}
+            <h2>{{ engine|title }} Search Results</h2>
+        {% endif %}
         <div class="result-stats">
             <span class="result-count">Found {{ matches|length }} result{% if matches|length != 1 %}s{% endif %}</span>
-            {% if engine %}
-            <span class="search-engine">({{ engine|title }} Search)</span>
-            {% endif %}
         </div>
         {% if filtered_count and filtered_count > 0 %}
         <div class="filter-info">
@@ -446,13 +454,11 @@
         </div>
         {% endif %}
         <div id="chart_area" style="align-content: center; margin: 10px;">
-            <h3>Search Result Stats</h3>
             {{ chart_div|safe }}
         </div>
     </div>
-    
     <!-- Results List -->
-    <div class="results-container">
+        <div class="results-container">
         {% if matches|length > 0 %}
             {% for restaurant in matches %}
                 <div class="restaurant-card">
@@ -572,7 +578,7 @@
                     </div>
                     {% endif %}
                 
-                    <Debug section (remove in production) -->
+                    <!-- Debug section (remove in production) -->
                     <details style="margin-top: 15px; background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 0.9em;">
                         <summary style="cursor: pointer; color: #666;">🔍 Show all data fields</summary>
                         <div style="text-align: left; margin-top: 10px; font-family: monospace;">
@@ -594,8 +600,9 @@
                 <p>Try adjusting your search terms or try a different search engine.</p>
             </div>
         {% endif %}
-    </div>
-
+        </div>
+    {% endif %}
+    
 </article>
 {% endif %}
 

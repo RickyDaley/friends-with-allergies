@@ -7,6 +7,7 @@ import json
 app = Flask(__name__)
 engine = 'semantic'
 sem_show, bool_tfidf_show = True, False
+first_load = True
 
 data = pd.DataFrame()
 review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = {}, {}, {}, {}, {}
@@ -14,15 +15,19 @@ embed_compiled_documents = []
 
 @app.route('/')
 def init():
-    global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict, compiled_documents, embed_compiled_documents
+    global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, \
+    pictures_dict, compiled_documents, embed_compiled_documents, first_load
+    first_load = True
     data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = dp.initialise_index()
     compiled_documents = ['\n'.join(menu_dict[key]) + '\n' + '\n'.join(review_dict[key]) for key in menu_dict.keys()]
     embed_compiled_documents = dp.model.encode(compiled_documents)
-    return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show)
+    return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, first_load=first_load)
 
 
 @app.route('/switch', methods=['POST'])
 def switch_engine():
+    global first_load
+    first_load = True
     global engine, sem_show, bool_tfidf_show
     if 'semantic' in request.form:
         engine = 'semantic'
@@ -38,7 +43,7 @@ def switch_engine():
         bool_tfidf_show = True
     else:
         return render_template('error.html', error_msg="Search engine is invalid or does not exist")
-    return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show,engine=engine)
+    return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, engine=engine, first_load=first_load)
 
 
 def doc_ids_to_data_entries(matched_docs):
@@ -76,6 +81,8 @@ def get_matching_scores(key_map, matched_docs):
 
 @app.route('/search_single', methods=['POST'])
 def search_single():
+    global first_load
+    first_load = False
     query = request.form.get('query', '')
     if not query:
         return render_template('error.html', error_msg="You forgot to enter a search term.")
@@ -95,11 +102,14 @@ def search_single():
                          chart_script=script,
                          chart_div=div,
                          chart_resources=resources,
-                         query=query)
+                         query=query,
+                         first_load=first_load)
 
 
 @app.route('/search_double', methods=['POST'])
 def search_double():
+    global first_load
+    first_load = False
     query_yes = request.form.get('query_yes', '')
     query_no = request.form.get('query_no', '')
     
@@ -183,6 +193,7 @@ def search_double():
                              engine=engine,
                              query_yes=query_yes,
                              query_no=query_no,
+                             first_load=first_load,
                              no_results_message="No restaurants found matching your criteria. Try different search terms.")
     
     # Convert restaurant names to data entries
@@ -227,7 +238,8 @@ def search_double():
                          chart_resources=resources,
                          query_yes=query_yes,
                          query_no=query_no,
-                         filtered_count=len(filtered_out_info))
+                         filtered_count=len(filtered_out_info),
+                         first_load=first_load)
 
 
 @app.errorhandler(404)
