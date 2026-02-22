@@ -431,14 +431,25 @@
         {% endif %}
         {% if bool_tfidf_show %}
         <div id="boolean-tf-idf-search">
-        <form action="/search_double" method="post">
-            <!-- Update the input fields to preserve values -->
-            <input type="text" name="query_yes" placeholder="Green Flag: I want this!" value="{{ query_yes or '' }}">
-            <input type="text" name="query_no" placeholder="Red Flag: Don't include!" value="{{ query_no or '' }}">
-        	<button type="submit">Search</button>
-    	</form>
-        {% endif %}
+            <form action="/search_double" method="post" style="display: flex; flex-direction: column; align-items: center;">
+                <div style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <label for="query_yes" style="font-weight: bold; color: #388e3c; margin-bottom: 4px;">
+                            <span style="font-size: 1.2em;">🟩</span> Green Flag: I want this!
+                        </label>
+                        <input type="text" id="query_yes" name="query_yes" placeholder="e.g. vegan, gluten free" value="{{ query_yes or '' }}">
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <label for="query_no" style="font-weight: bold; color: #d32f2f; margin-bottom: 4px;">
+                            <span style="font-size: 1.2em;">🟥</span> Red Flag: Don't include!
+                        </label>
+                        <input type="text" id="query_no" name="query_no" placeholder="e.g. nuts, shellfish" value="{{ query_no or '' }}">
+                    </div>
+                    <button type="submit" style="align-self: flex-end;">Search</button>
+                 </div>
+            </form>
         </div>
+        {% endif %}
 
     </article>
     {% if matches is not none %}
