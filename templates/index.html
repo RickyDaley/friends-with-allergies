@@ -389,7 +389,7 @@
                 class="switch_{{ engine == 'semantic' }}"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
-                data-bs-title="Find restaurants based on meaning & context of the query — best for natural language → example: 'cozy vegan place near sea with good desserts'">
+                data-bs-title="Find restaurants based on meaning & context of the query — best for natural language → example: 'meatless burgers and lactose-free desserts'">
             Semantic Search
         </button>
     </form>
@@ -711,7 +711,7 @@
             fillOpacity: 0.5,
             radius: 40
         }).addTo(map);
-        circle.bindPopup(`<b>${item.Name}</b> <br> <sup>${item.Address}</sup> <br>🌍 ${item.Cuisine} <br>⭐ ${item['Rating (out of 6)']}/6`);
+        circle.bindPopup(`<b>${item.Name}</b> <br> <sup>${item.Address}</sup> <br>🌍 ${item.Cuisine} <br>⭐ ${item['Rating (out of 6)'] ? item['Rating (out of 6)'] : '-'}/6`);
     }
 </script>
 
