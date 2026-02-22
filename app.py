@@ -16,12 +16,15 @@ embed_compiled_documents = []
 @app.route('/')
 def init():
     global data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, \
-    pictures_dict, compiled_documents, embed_compiled_documents, first_load
+    pictures_dict, compiled_documents, embed_compiled_documents, \
+    first_load, engine, sem_show, bool_tfidf_show 
     first_load = True
+    engine = 'semantic'
+    sem_show, bool_tfidf_show = True, False
     data, review_dict, menu_dict, embed_review_dict, embed_menu_dict, pictures_dict = dp.initialise_index()
     compiled_documents = ['\n'.join(menu_dict[key]) + '\n' + '\n'.join(review_dict[key]) for key in menu_dict.keys()]
     embed_compiled_documents = dp.model.encode(compiled_documents)
-    return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, first_load=first_load)
+    return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, first_load=first_load, matches=[])
 
 
 @app.route('/switch', methods=['POST'])
@@ -43,7 +46,7 @@ def switch_engine():
         bool_tfidf_show = True
     else:
         return render_template('error.html', error_msg="Search engine is invalid or does not exist")
-    return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, engine=engine, first_load=first_load)
+    return render_template('index.html', sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, engine=engine, first_load=first_load, matches=[])
 
 
 def doc_ids_to_data_entries(matched_docs):

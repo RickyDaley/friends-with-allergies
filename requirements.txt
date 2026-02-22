@@ -10,4 +10,5 @@ scikit-learn
 flask
 bokeh
 translators
+googlemaps
 sentence_transformers
