@@ -433,8 +433,8 @@
         <div id="boolean-tf-idf-search">
         <form action="/search_double" method="post">
             <!-- Update the input fields to preserve values -->
-            <input type="text" name="query_yes" placeholder="Green flag: I want this!" value="{{ query_yes or '' }}">
-            <input type="text" name="query_no" placeholder="Red flag: Don't include!" value="{{ query_no or '' }}">
+            <input type="text" name="query_yes" placeholder="Green Flag: I want this!" value="{{ query_yes or '' }}">
+            <input type="text" name="query_no" placeholder="Red Flag: Don't include!" value="{{ query_no or '' }}">
         	<button type="submit">Search</button>
     	</form>
         {% endif %}
@@ -447,7 +447,7 @@
      <!-- Welcome Message -->
         <div class="no-results">
             <h3>Welcome to the FwA restaurant search tool!</h3>
-            <p>Enter your gastronomical wishes and concers, and we'll find you the best places and dishes in Helsinki which fully match your needs.</p>
+            <p>Enter your gastronomical wishes and concerns, and we'll find you the best places and dishes in Helsinki which fully match your needs.</p>
         </div>   
     {% else %}
     <!-- Result Header -->
