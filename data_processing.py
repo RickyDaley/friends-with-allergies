@@ -154,7 +154,32 @@ def extract_lemmas(docs):
     return [lem_sentence(doc) for doc in docs]
 
 
+def fix_spaces_around_brackets(query_string):
+    reconstructed_string = ''
+    for i, c in enumerate(query_string):
+        if c == '(':
+            if i == len(query_string) - 1:
+                break
+            if i > 0 and query_string[i - 1] != ' ':
+                reconstructed_string += ' '
+            reconstructed_string += c
+            if query_string[i + 1] != ' ':
+                reconstructed_string += ' '
+        elif c == ')':
+            if i == 0:
+                continue
+            if query_string[i - 1] != ' ':
+                reconstructed_string += ' '
+            reconstructed_string += c
+            if i < len(query_string) - 1 and query_string[i + 1] != ' ':
+                reconstructed_string += ' '
+        else:
+            reconstructed_string += c
+    return reconstructed_string.strip()
+
+
 def rewrite_query(query):
+    query = fix_spaces_around_brackets(query)
     tokens = query.split()
     operators = ("and", "or", "not", "&", "|", "(", ")")
     parts = []
@@ -192,7 +217,7 @@ def boolean_search(query, documents):
     transl_query = translate_chunk(query)
     lemmatized_query = extract_lemmas(transl_query)
     rewritten, min_ngram_size, max_ngram_size = rewrite_query(lemmatized_query)
-
+    print(rewritten)
     cv = CountVectorizer(lowercase=True, binary=True, preprocessor=extract_lemmas, ngram_range=(min_ngram_size, max_ngram_size))
     sparse_matrix = cv.fit_transform(documents)
     dense_matrix = sparse_matrix.todense()

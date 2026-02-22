@@ -129,9 +129,12 @@ def search_double():
     if query_yes:
         # Perform search based on selected engine
         if engine == 'boolean':
-            matched_docs = dp.boolean_search(query_yes, dishes_list)
+            bool_query = f"( {query_yes} ) and not ( {query_no} )" if query_no else query_yes
+            matched_docs = dp.boolean_search(bool_query, dishes_list)
         elif engine == 'tf_idf':
-            matched_docs = dp.tf_idf_search(query_yes, dishes_list)
+            good_docs = dp.tf_idf_search(query_yes, dishes_list)
+            bad_docs = dp.tf_idf_search(query_no, dishes_list)
+            matched_docs = list(set(good_docs) - set(bad_docs))
         else:
             return render_template('error.html', error_msg="Wrong search engine name or no search engine provided")
         
