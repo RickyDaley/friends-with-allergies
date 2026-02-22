@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 import data_processing as dp
 import pandas as pd
 import json
@@ -27,9 +27,12 @@ def init():
     return render_template('index.html', engine=engine, sem_show=sem_show, bool_tfidf_show=bool_tfidf_show, first_load=first_load, matches=[])
 
 
-@app.route('/switch', methods=['POST'])
+@app.route('/switch', methods=['GET', 'POST'])
 def switch_engine():
     global first_load
+    if request.method == 'GET':
+        # if user tries to access the switch route directly, just redirect them to the main page without changing anything
+        return redirect(url_for('init'))  # 'init' is the name of the function handling the '/' route
     first_load = True
     global engine, sem_show, bool_tfidf_show
     if 'semantic' in request.form:
@@ -82,9 +85,11 @@ def get_matching_scores(key_map, matched_docs):
     return scores
 
 
-@app.route('/search_single', methods=['POST'])
+@app.route('/search_single', methods=['POST', 'GET'])
 def search_single():
     global first_load
+    if request.method == 'GET':
+        return redirect(url_for('init'))
     first_load = False
     query = request.form.get('query', '')
     if not query:
@@ -109,9 +114,11 @@ def search_single():
                          first_load=first_load)
 
 
-@app.route('/search_double', methods=['POST'])
+@app.route('/search_double', methods=['POST', 'GET'])
 def search_double():
     global first_load
+    if request.method == 'GET':
+        return redirect(url_for('init'))
     first_load = False
     query_yes = request.form.get('query_yes', '')
     query_no = request.form.get('query_no', '')
@@ -124,6 +131,17 @@ def search_double():
     # Search for dishes/menus that match the green flag query
     rest_to_dish_map, dishes_list = dict_values_to_list(menu_dict)
     
+    if not dishes_list:
+        return render_template('index.html', 
+            sem_show=sem_show, 
+            bool_tfidf_show=bool_tfidf_show, 
+            matches=[],
+            engine=engine,
+            query_yes=query_yes,
+            query_no=query_no,
+            first_load=first_load,
+            no_results_message="No dishes found for your search. Try different terms.")
+
     matching_dishes = {}  # Store matched dishes for display
     
     if query_yes:

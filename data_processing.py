@@ -214,6 +214,8 @@ def get_term_vector(term, t2i, td_matrix):
 def boolean_search(query, documents):
     if not query:
         return []
+    if not documents or all(not doc.strip() for doc in documents):
+        return []
     transl_query = translate_chunk(query)
     lemmatized_query = extract_lemmas(transl_query)
     rewritten, min_ngram_size, max_ngram_size = rewrite_query(lemmatized_query)
