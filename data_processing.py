@@ -246,6 +246,10 @@ def tf_idf_search(query, documents):
     tf_matrix = tfv.fit_transform(documents).T.tocsr()
     query_vec = tfv.transform([lemmatized_query]).tocsc()
     hits = np.dot(query_vec, tf_matrix) 
+    
+    # added check for empty hits to avoid errors when converting to dict and sorting
+    if hits is None or hits.size == 0 or hits.nnz == 0:
+        return {}
 
     doc_ids_and_scores = dict(zip(hits.nonzero()[1], np.array(hits[hits.nonzero()])[0]))
     doc_ids_and_scores = sorted(doc_ids_and_scores.items(), key=lambda x: -x[1])
